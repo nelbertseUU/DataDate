@@ -360,17 +360,18 @@ class User extends MY_Controller {
     
     function datum_regex($geboortedatum)
     {
-       /* $regexp = '(^(((0[1-9]|1[0-9]|2[0-8])-(0[1-9]|1[012]))|((29|30|31)-(0[13578]|1[02]))|((29|30)-(0[4,6,9]|11)))-(19|[2-9][0-9])\d\d$)|(^29-02-(19|[2-9][0-9])(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96)$)'; 
+       $regexp = '#(^(((0[1-9]|1[0-9]|2[0-8])-(0[1-9]|1[012]))|((29|30|31)-(0[13578]|1[02]))|((29|30)-(0[4,6,9]|11)))-(19|[2-9][0-9])\d\d$)|(^29-02-(19|[2-9][0-9])(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96)$)#'; 
         // Deze regex kijkt in één keer of de ingevoerde datum geldig is voor dd-mm-jjjj, inclusief schrikkeljaar.
         
         if(!preg_match($regexp,$geboortedatum))
         {
             //geen geldige datum
             return false;
-        }*/
+        }
         return true;
     }
     
+    //Kijkt dynamisch (verandert elke seconde) of een persoon 18+ is
     function geboortedatum_achttien($geboortedatum)
     {
         $age = 18;
@@ -385,5 +386,29 @@ class User extends MY_Controller {
         return true;  
     }
     
-    
+    function do_upload()
+	{
+		$config['upload_path'] = './uploads/';
+		$config['allowed_types'] = 'gif|jpg|png';
+		$config['max_size']	= '100';
+		$config['max_width']  = '1024';
+		$config['max_height']  = '768';
+
+		$this->load->library('upload', $config);
+
+		if ( ! $this->upload->do_upload())
+		{
+			$error = array('error' => $this->upload->display_errors());
+            
+            $this->session->set_flashdata('error', $error['error']);
+            
+			redirect('User', refresh());
+		}
+		else
+		{
+			$data = array('upload_data' => $this->upload->data());
+
+			$this->load->view('upload_succes', $data);
+		}
+	}  
 }?>

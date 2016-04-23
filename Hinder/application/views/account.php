@@ -84,11 +84,16 @@
                       echo base_url('css/images/female_silhouette.jpg');
                   }
                   ?>" alt="profiel_afbeelding">
-        <?php if(isset($error)){echo $error;}?>
-        <?php echo form_open_multipart('User/wijzigImg');?>
-            <input type="file" name="afbeelding" size="20"><br />
-            <div class="centreer margin_top_15"><input type="submit" value="Upload"></div>
-        </form>
+        <?php if(isset($error))echo $error; if(isset($students))echo $succes;?>
+        <?php echo form_open_multipart('upload/do_upload');?>
+
+<input type="file" name="userfile" size="20" />
+
+<br /><br />
+
+<input class="verzendknop" type="submit" value="upload" />
+
+</form>
         <?php echo "<div class='account_info bold'><p>Nickname: ".$nick."</p><p>Voornaam: ".$voornaam."</p><p>Achternaam: ".$achternaam."</p><p>E-mail: ".$email."</p><p>Geslacht: ";
         if($geslacht == 'M'){
               echo 'Man';

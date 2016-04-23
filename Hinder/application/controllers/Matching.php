@@ -52,7 +52,7 @@ class Matching extends MY_Controller {
         }
         
         //geslachtvoorkeur van de pre-matches
-         $alleIDGeslacht2 = array();
+        $alleIDGeslacht2 = array();
         foreach($alleIDGeslacht1 as $key => $id){
            
             foreach($this->User_model->getVoorkeuren($id) as $row){
@@ -92,7 +92,6 @@ class Matching extends MY_Controller {
         }
         
         //opzoeken van de beste match
-
         foreach($this->Match_model->getPersVk($UserID) as $row){
             $I_u = $row['V_I'];
             $E_u = $row['V_E'];
@@ -103,27 +102,32 @@ class Matching extends MY_Controller {
             $T_u = $row['V_T'];
             $F_u = $row['V_F'];
         }     
-         
+        
+        foreach($this->User_model->getVoorkeuren($UserID) as $row){
+            $merkVk_u = $row['Vk_merk'];
+        }
+        
         foreach($alleIDLeeftijd2 as $id){
-               
+            
            foreach($this->User_model->getVoorkeuren($id) as $row){
                 
                 if( $row['Vk_merk'] != NULL){
-                    $merkVk = $row['Vk_merk'];
-                    list($merk1, $merk2, $merk3) = explode(", ", $merkVk);
-                     $driemerkenarray = array($merk1, $merk2, $merk3);
+                    $merkVk_m = $row['Vk_merk'];
+                    list($merk1, $merk2, $merk3) = explode(", ", $merkVk_m);
+                    $driemerkenarray = array($merk1, $merk2, $merk3);
                 }
-                    if(isset($merkVk)){
+                    if(isset($merkVk_m)){
                     $driemerken = implode(', ', $driemerkenarray);
                 }
                 else{
-                    $driemerken = $merkVk;
+                    $driemerken = $merkVk_m;
                 }
             }
                
             foreach($this->User_model->getTypeByID($id) as $row){
                 $ptype = $row['TYPE'];
             }
+            
             foreach($this->Match_model->getRandom($id) as $row){
                 $nick = $row['Nickname'];
                 $geb = $row['Geboortedatum'];
@@ -131,72 +135,60 @@ class Matching extends MY_Controller {
                 $beschrijving = $row['Beschrijving'];
                 $id = $row['UserID'];
             }   
+            
             foreach($this->Match_model->getAllPersByID($id) as $row){
-            $I_m = $row['I'];
-            $E_m = $row['E'];
-            $J_m = $row['J'];
-            $P_m = $row['P'];
-            $N_m = $row['N'];
-            $S_m = $row['S'];
-            $T_m = $row['T'];
-            $F_m = $row['F'];    
+                $I_m = $row['I'];
+                $E_m = $row['E'];
+                $J_m = $row['J'];
+                $P_m = $row['P'];
+                $N_m = $row['N'];
+                $S_m = $row['S'];
+                $T_m = $row['T'];
+                $F_m = $row['F'];    
             } 
             
-            $afstand = $this->getAfstand($I_m, $E_m, $J_m, $P_m, $N_m, $S_m, $T_m, $F_m, $I_u, $E_u, $J_u, $P_u, $N_u, $S_u, $T_u, $F_u);
             
-            $match[] = array('afstand' => $afstand, 'gebruiker' => $nick, 'gebdatum' => $geb, 'geslacht' => $geslacht, 'beschrijving' => $beschrijving, 'persType' => $ptype, 'merkVk' => $driemerken, 'id' => $id);
+            $rel = $this->relatietype($id);
+            $m_afstand = $this->getCoefficient($merkVk_u, $merkVk_m);
+            
+            $p_afstand = $this->getAfstand($I_m, $E_m, $J_m, $P_m, $N_m, $S_m, $T_m, $F_m, $I_u, $E_u, $J_u, $P_u, $N_u, $S_u, $T_u, $F_u);
+            
+            $xFactor = 0.5;
+            $afstand = $xFactor * $p_afstand + (1 - $xFactor) * $m_afstand;
+            
+            $match[] = array('afstand' => $afstand, 'gebruiker' => $nick, 'gebdatum' => $geb, 'geslacht' => $geslacht, 'beschrijving' => $beschrijving, 'persType' => $ptype, 'merkVk' => $driemerken, 'id' => $id, 'relatie' => $rel);
        
         }
         sort($match);
-        
-        /*
-        $j1 = json_encode($alleID);
-        $j2 = json_encode($alleIDGeslacht1);
-        $j3 = json_encode($alleIDGeslacht2);
-        $j4 = json_encode($alleIDLeeftijd1);
-        $j5 = json_encode($alleIDLeeftijd2);
-         echo $j1;
-        echo $j2; 
-        echo $j3;
-        echo $j4;
-        echo $j5;
-        */
-        
         $match = json_encode($match);
-       
         echo $match;
-        
-       /* foreach($this->Match_model->getAllPersByID($UserID) as $row){
-            $I_user = $row['I'];
-            $E_user = $row['E'];
-            $J_user = $row['J'];
-            $P_user = $row['P'];
-            $N_user = $row['N'];
-            $S_user = $row['S'];
-            $T_user = $row['T'];
-            $F_user = $row['F'];
-        }   
-        
-        
-        
-        foreach($this->Match_model->getUsersFromVk($geslachtVk, $min_age, $max_age) as $row){
-            
-        }
-        
-        $data['I'] = $I_user;
-        $data['E'] = $E_user;
-        $data['J'] = $J_user;
-        $data['P'] = $P_user;
-        $data['N'] = $N_user;
-        $data['S'] = $S_user;
-        $data['T'] = $T_user;
-        $data['F'] = $F_user;
-        $data['geslachtVk'] = $geslachtVk;
-        $data['min_age'] = $min_age;
-        $data['max_age'] = $max_age;*/
-        
-       
     }
+     public function relatietype($gekregenID){
+        $x = 0;
+        $id = $gekregenID;
+        if (isset($_SESSION["UserID"]))  
+		{ $UserID = $_SESSION["UserID"];
+         
+			foreach($this->User_model->getLike($UserID, $id) as $row){
+                if($row['OtherUserID']){ 
+                    $x = 1;
+                    foreach($this->User_model->getLike($id, $UserID) as $row2){
+                    if($row2['OtherUserID']){
+                        $x = 3;
+                    }
+                    }
+                }else{
+                    foreach($this->User_model->getLike($id, $UserID) as $row3){
+                    if($row3['OtherUserID']){
+                        $x = 2;
+                    }
+                    }
+                }
+           }
+		}
+     return $x;   
+  	}
+    
     public function getAfstand($I_m, $E_m, $J_m, $P_m, $N_m, $S_m, $T_m, $F_m, $I_u, $E_u, $J_u, $P_u, $N_u, $S_u, $T_u, $F_u){
         $d1 = '';
         $d2 = '';
@@ -252,7 +244,7 @@ class Matching extends MY_Controller {
             else{
                 $d3 = $T_m - $T_u;
             }
-        } 
+        }
     
         if($P_u > $J_u){
             if($P_u > $P_m){
@@ -270,16 +262,25 @@ class Matching extends MY_Controller {
                 $d4 = $J_m - $J_u;
             }
        }
-        
        return (($d1 + $d2 + $d3 + $d4)/400);
     }
     
-    
     public function getAge($birthDate){ 
         $birthDate = explode("-", $birthDate);
+        
         return (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
         ? ((date("Y") - $birthDate[2]) - 1)
         : (date("Y") - $birthDate[2]));
+    }
+    
+    function getCoefficient($string1, $string2) {
+        $string_array1 = explode( ',', $string1 );
+        $string_array2 = explode( ',', $string2 );
+        $array_intersection = array_intersect( $string_array2, $string_array2 );
+        $array_union = array_merge( $string_array1, $string_array2 );
+        $coefficient = count( $array_intersection ) / count( $array_union );
+
+        return $coefficient;
     }
 }
 ?>

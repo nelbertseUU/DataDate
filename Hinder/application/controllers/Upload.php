@@ -15,7 +15,7 @@ class Upload extends CI_Controller {
 
 	function do_upload()
 	{
-		$config['upload_path'] = './db/uploads/';
+		$config['upload_path'] = './uploads/';
 		$config['allowed_types'] = 'gif|jpg|png';
 		$config['max_size']	= '100';
 		$config['max_width']  = '1024';
@@ -33,7 +33,7 @@ class Upload extends CI_Controller {
 		{
 			$data = array('upload_data' => $this->upload->data());
 
-			$this->load->view('upload_success', $data);
+			$this->load->view('upload_succes', $data);
 		}
 	}
 }

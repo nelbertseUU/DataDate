@@ -50,6 +50,7 @@ class Main extends CI_Controller {
             foreach($this->User_model->getTypeByID($randomID) as $row){
                 $ptype = $row['TYPE'];
             }
+            
             foreach($this->Match_model->getRandom($randomID) as $row){
                 $nick = $row['Nickname'];
                 $geb = $row['Geboortedatum'];
@@ -57,8 +58,8 @@ class Main extends CI_Controller {
                 $beschrijving = $row['Beschrijving'];
                 $id = $row['UserID'];
             }   
-            
-            $dingetje[] = array( 'gebruiker' => $nick, 'gebdatum' => $geb, 'geslacht' => $geslacht, 'beschrijving' => $beschrijving, 'persType' => $ptype, 'merkVk' => $driemerken, 'id' => $id);
+            $rel = $this->relatietype($randomID);
+            $dingetje[] = array( 'gebruiker' => $nick, 'gebdatum' => $geb, 'geslacht' => $geslacht, 'beschrijving' => $beschrijving, 'persType' => $ptype, 'merkVk' => $driemerken, 'id' => $id, 'relatie' => $rel);
        
         }
         
@@ -66,6 +67,35 @@ class Main extends CI_Controller {
         echo $dingetje;
         
     }
-   
+  
+    public function relatietype($gekregenID){
+        $x = 0;
+        $id = $gekregenID;
+        if (isset($_SESSION["UserID"]))  
+		{ $UserID = $_SESSION["UserID"];
+         
+			foreach($this->User_model->getLike($UserID, $id) as $row){
+                if($row['OtherUserID']){ 
+                    $x = 1;
+                    foreach($this->User_model->getLike($id, $UserID) as $row2){
+                    if($row2['OtherUserID']){
+                        $x = 3;
+                    }
+                    }
+                }else{
+                    foreach($this->User_model->getLike($id, $UserID) as $row3){
+                    if($row3['OtherUserID']){
+                        $x = 2;
+                    }
+                    }
+                }
+           }
+		}
+     return $x;   
+  	}
+    
+    
+    
+    
 }
 ?>
